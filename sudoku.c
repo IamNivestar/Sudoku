@@ -184,18 +184,18 @@ void imprime_tabuleiro(int tabuleirox[][9],int predefinida[][9]){
 	printf(" \x1b[32m  1  2  3   4  5  6   7  8  9\x1b[0m  \n");
 	printf("++---------+---------+---------+\n");
 	for (i = 0; i < 9; i++) {
-			printf("\x1b[32m%d\x1b[0m|",i+1);
-			for (j = 0; j < 9; j++) {
-				if (tabuleirox[i][j] != 0)
-					if(predefinida[i][j]== 0)  //if somente para printar colorido
-						printf(" %d ", tabuleirox[i][j]);
-					else
-						printf(" \x1b[35m%d\x1b[0m ", tabuleirox[i][j]);
+		printf("\x1b[32m%d\x1b[0m|",i+1);
+		for (j = 0; j < 9; j++) {
+			if (tabuleirox[i][j] != 0)
+				if(predefinida[i][j]== 0)  //if somente para printar colorido
+					printf(" %d ", tabuleirox[i][j]);
 				else
-					printf("   ");
-				if (j % 3 == 2)
-					printf("|");
-			}
+					printf(" \x1b[35m%d\x1b[0m ", tabuleirox[i][j]);
+			else
+				printf("   ");
+			if (j % 3 == 2)
+				printf("|");
+		}
 		if (i % 3 == 2)
 			printf("\n++---------+---------+---------+");
 		printf("\n");
@@ -444,20 +444,21 @@ void adicionar_jogada(){
       	}
 
     }else{
+		system("clear");
 		imprime_tabuleiro(tabuleirox,predefinida);
 		printf("COORDENADA DIGITADA E INVALIDA\n\n");
 		return adicionar_jogada();
     }
 }
 
-void carregar_jogo(int jogo_escolhido){
-
+int carregar_jogo(){
+	int jogo_escolhido;
 	FILE *save= fopen("salvo.txt","r");
 	if(save == NULL){
 		system("clear");
 		printf("ERRO! NAO E POSSIVEL ENCONTRAR ARQUIVO SAVE\n");
 		sleep(1);
-		return;
+		exit(0);
 	}
 
 	for(i=0;i<9;i++){
@@ -473,6 +474,7 @@ void carregar_jogo(int jogo_escolhido){
 	fscanf(save,"%d",&jogo_escolhido);
 	fscanf(save,"%f",&tempo2);
 	fclose(save);
+	return jogo_escolhido;
 }
 
 void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas dentro do jogo
@@ -584,7 +586,7 @@ int main(){
 				menu_jogo(jogo_escolhido);
 				break;
 			case 2:
-				carregar_jogo(jogo_escolhido);
+				jogo_escolhido = carregar_jogo();
 				menu_jogo(jogo_escolhido);
 				break;
 			case 3:
