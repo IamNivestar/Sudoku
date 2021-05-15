@@ -82,8 +82,8 @@ int tentativa_de_colocar_numero (int a, int b, int c){ //examina se o jogador ac
 					return 0;
 			}
 		}
+		return 1; //valor passou nos testes e foi inserito corretamente
 	}
-	return 1; //valor passou nos testes e foi inserito corretamente
 }
 
 int checar_coordenada (int linha, int coluna){ //verificando se as coordenas são validas
@@ -119,35 +119,41 @@ int escolha_tabuleiro(int tabuleirox[][9],int predefinida[][9]){
 		scanf("%d", &jogo_escolhido);
 		switch(jogo_escolhido){   //carrengar tabuleiro escolhido
 			case 1: //jogo1
-				file=fopen("jogo1.txt","r");
+				file=fopen("tabuleiros/jogo1.txt","r");
 				break;
 			case 2: //jogo2
-				file=fopen("jogo2.txt","r");
+				file=fopen("tabuleiros/jogo2.txt","r");
 				break;
 			case 3: //jogo3
-				file=fopen("jogo3.txt","r");
+				file=fopen("tabuleiros/jogo3.txt","r");
 				break;
 			case 4: //jogo4
-				file=fopen("jogo4.txt","r");
+				file=fopen("tabuleiros/jogo4.txt","r");
 				break;
 			case 5: //jogo5
-				file=fopen("jogo5.txt","r");
+				file=fopen("tabuleiros/jogo5.txt","r");
 				break;
 			case 6: //jogo6
-				file=fopen("jogo6.txt","r");
+				file=fopen("tabuleiros/jogo6.txt","r");
 				break;
 			case 7: //jogo7
-				file=fopen("jogo7.txt","r");
+				file=fopen("tabuleiros/jogo7.txt","r");
 				break;
 			case 8: //jogo8
-				file=fopen("jogo8.txt","r");
+				file=fopen("tabuleiros/jogo8.txt","r");
 				break;
 			case 9: //jogo9
-				file=fopen("jogo9.txt","r");
+				file=fopen("tabuleiros/jogo9.txt","r");
 				break;
 			default: //jogo invalido retorna ao inicio dessa funçao
 				printf("\nOpcao Invalida\n");
 		}
+	}
+	if(file == NULL){
+		system("clear");
+		printf("ERRO! ARQUIVO DO TABULEIRO NAO ENCONTRADO.\n");
+		sleep(1);
+		exit(1);
 	}
 	for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
@@ -349,46 +355,49 @@ void dica(){
 
 }
 
-void resposta_tabuleiro(int jogo_escolhido, int resposta[][9]){
+void resposta_tabuleiro(int jogo_escolhido, int matriz_resposta[][9]){
 	FILE *file;
+
 	switch(jogo_escolhido){
 		case 1: //jogo1
-			file=fopen("resposta1.txt","r");
+			file=fopen("respostas/resposta1.txt","r");
 			break;
 		case 2: //jogo2
-			file=fopen("resposta2.txt","r");
+			file=fopen("respostas/resposta2.txt","r");
 			break;
 		case 3: //jogo3
-			file=fopen("resposta3.txt","r");
+			file=fopen("respostas/resposta3.txt","r");
 			break;
 		case 4: //jogo4
-			file=fopen("resposta4.txt","r");
+			file=fopen("respostas/resposta4.txt","r");
 			break;
 		case 5: //jogo5
-			file=fopen("resposta5.txt","r");
+			file=fopen("respostas/resposta5.txt","r");
 			break;
 		case 6: //jogo6
-			file=fopen("resposta6.txt","r");
+			file=fopen("respostas/resposta6.txt","r");
 			break;
 		case 7: //jogo7
-			file=fopen("resposta7.txt","r");
+			file=fopen("respotas/resposta7.txt","r");
 			break;
 		case 8: //jogo8
-			file=fopen("resposta8.txt","r");
+			file=fopen("respostas/resposta8.txt","r");
 			break;
 		case 9: //jogo9
-			file=fopen("resposta9.txt","r");
+			file=fopen("respostas/resposta9.txt","r");
 			break;
 	}
 	if(file == NULL){
+		system("clear");
 		printf("ERRO! NAO FOI POSSIVEL ENCONTRAR ARQUIVO DE RESPOSTA\n");
+		sleep(0.4);
 		return;
 	}
 	system("clear");
 	printf("RESPOSTA\n");
 	for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
-			fscanf(file,"%d",&resposta[i][j]);
+			fscanf(file,"%d",&matriz_resposta[i][j]);
 		}
 	}
 	fclose(file);
@@ -484,7 +493,7 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 				alternativa = -1;
 				while(alternativa != 0 && alternativa!=1){
 					printf("DESEJA SALVAR SEU PROGRESSO?\n");
-					sleep(0.4);
+					sleep(0.1);
 					printf("APENAS 1 SAVE PODE EXISTIR,");
 					printf(" CASO JA EXISTA OUTRO JOGO, SERA SOBREESCRITO)\n 1-SIM, SALVAR.\t\t\t0-NAO.\n\n");
 					scanf("%d",&alternativa);
