@@ -55,9 +55,9 @@ void imprime_records(){
 		fscanf(record,"%s",nome3);
 		fclose(record);
 		printf("--------------------------------------------------------------------\n");
-		printf("1- %s\t\t\t\t\t\t %.2f segundos\n",nome1,tempo_record1);
-		printf("2- %s\t\t\t\t\t\t %.2f segundos\n",nome2,tempo_record2);
-		printf("3- %s\t\t\t\t\t\t %.2f segundos\n",nome3,tempo_record3);
+		printf("1- %s\t\t\t\t\t\t %.3f minutos\n",nome1,tempo_record1);
+		printf("2- %s\t\t\t\t\t\t %.3f minutos\n",nome2,tempo_record2);
+		printf("3- %s\t\t\t\t\t\t %.3f minutos\n",nome3,tempo_record3);
 	}
 	
 	printf("\nINSIRA QUALQUER VALOR PARA RETORNAR AO MENU...\n");
@@ -244,7 +244,6 @@ void melhores_tempos(float tempo,char jogador[]){
 	fscanf(record,"%f",&tempo_record3);
 	fscanf(record,"%s",nome3);
 	fclose(record);
-	printf("%s",jogador);
 	if(tempo<tempo_record1){
 		FILE *record=fopen("recordes.txt","w");
 		tempo_record3=tempo_record2;
@@ -599,6 +598,7 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 // main --------------------------------
 int main(){
 	int escolha_inicial= 1, jogo_escolhido;
+	printf("\nFeito por Amaury");
 	while(escolha_inicial != 0){
 		printf("\n-------------------------BEM-VINDO AO SUDOKU------------------------\n\n");
 		printf("\t\t\t1-NOVO JOGO.\n\t\t\t2-CONTINUAR JOGO.\n\t\t\t3- LER REGRAS\n\t\t\t4- RECORDS\n\t\t\t0- SAIR.\n\n");
