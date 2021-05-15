@@ -13,16 +13,20 @@ int tabuleirox[9][9]; //matriz principal onde será salvo o jogo
 int predefinida[9][9]; //matriz com o tabuleiro pre-definido
 
 void imprime_regras(){
-
+	system("clear");
 	printf("\n-----------------------REGRAS DO JOGO SUDOKU------------------------\n\n");
 	printf("O Sudoku E um passatempo, pra ser jogado por apenas uma pessoa\n");
 	printf("que envolve raciocinio e logica.\n A ideia do jogo E bem simples:\n"); 
-	printf("completar todas as 81 celulas usando números de 1 a 9 sem repetir\n");
+	printf("completar todas as 81 celulas usando numeros de 1 a 9 sem repetir\n");
 	printf("os numeros numa mesma linha, coluna ou grade (3x3).\n\n");
 	printf("---------------------------TEMPO DO JOGO----------------------------\n");
 	printf("\nO tempo de jogo pode variar, os tres melhores tempos serao registrados");
-	printf("para jogador e dificuldade.\n\n\n");
-	
+	printf("para jogador e dificuldade.\n\n");
+	printf("---------------------------LEGENDA----------------------------\n");
+	printf("\nOs valores em verde ja sao preenchidos inicialmente e nao podem ser modificados.\n");
+	printf(" Enquanto os valores inserido pelo usuario estaram com numeracao em branco.\n");
+	printf(" As linhas e as colunas possuem numeracao em alaranjado para facilitar");
+	printf(" a visualizacao das coordenadas.\n\n\n");
 	printf("APERTE ENTER PARA RETORNAR AO MENU...\n");
 	while(getchar()!='\n');
     getchar();
@@ -33,7 +37,7 @@ void imprime_regras(){
 void imprime_records(){
 	char nome1[25], nome2[25], nome3[25];
 	float tempo_record1,tempo_record2,tempo_record3; //tempo dos recordistas
-
+	system("clear");
 	printf("\n-----------------------------RECORDS--------------------------------\n\n");
 
 	FILE *record=fopen("recordes.txt","r");
@@ -51,12 +55,12 @@ void imprime_records(){
 		fscanf(record,"%s",nome3);
 		fclose(record);
 		printf("--------------------------------------------------------------------\n");
-		printf("1- |%s          |\t\t\t\t     |%.2f segundos|\n",nome1,tempo_record1);
-		printf("2- |%s         |\t\t\t\t     |%.2f segundos|\n",nome2,tempo_record2);
-		printf("3- |%s            |\t\t\t\t     |%.2f segundos|\n",nome3,tempo_record3);
+		printf("1- %s\t\t\t\t\t\t %.2f segundos\n",nome1,tempo_record1);
+		printf("2- %s\t\t\t\t\t\t %.2f segundos\n",nome2,tempo_record2);
+		printf("3- %s\t\t\t\t\t\t %.2f segundos\n",nome3,tempo_record3);
 	}
 	
-	printf("INSIRA QUALQUER VALOR PARA RETORNAR AO MENU...\n");
+	printf("\nINSIRA QUALQUER VALOR PARA RETORNAR AO MENU...\n");
 	while(getchar()!='\n');
     getchar();
 	system("clear");
@@ -181,16 +185,16 @@ int escolha_tabuleiro(int tabuleirox[][9],int predefinida[][9]){
 
 void imprime_tabuleiro(int tabuleirox[][9],int predefinida[][9]){
 
-	printf(" \x1b[32m  1  2  3   4  5  6   7  8  9\x1b[0m  \n");
+	printf(" \x1b[33m  1  2  3   4  5  6   7  8  9\x1b[0m  \n");
 	printf("++---------+---------+---------+\n");
 	for (i = 0; i < 9; i++) {
-		printf("\x1b[32m%d\x1b[0m|",i+1);
+		printf("\x1b[33m%d\x1b[0m|",i+1);
 		for (j = 0; j < 9; j++) {
 			if (tabuleirox[i][j] != 0)
 				if(predefinida[i][j]== 0)  //if somente para printar colorido
 					printf(" %d ", tabuleirox[i][j]);
 				else
-					printf(" \x1b[35m%d\x1b[0m ", tabuleirox[i][j]);
+					printf(" \x1b[32m%d\x1b[0m ", tabuleirox[i][j]);
 			else
 				printf("   ");
 			if (j % 3 == 2)
@@ -298,14 +302,13 @@ void final(){ //função para verificar se o tabuleiro foi concluido e para fina
       		}
     	}
   	}
-	printf("TABULEIRO PREENCHIDO\n");
+	printf("PARABÉNS TABULEIRO PREENCHIDO\n");
 	t_fim;
 	t_fim = time(NULL);
 	tempo= difftime(t_fim,t_iniciar);
 	tempo= tempo + tempo2;
 	tempo= tempo/60;
 	printf("DIGITE SEU NOME JOGADOR:\n");
-	setbuf(stdin,NULL);
 	scanf("%s",jogador);
 	printf("VOCE CONCLUIU O JOGO EM %.2f MINUTOS\n",tempo);
 	printf("OBRIGADO POR JOGAR %s!!!\n\n",jogador);
@@ -394,7 +397,7 @@ void resposta_tabuleiro(int jogo_escolhido, int matriz_resposta[][9]){
 		return;
 	}
 	system("clear");
-	printf("RESPOSTA\n");
+	printf("RESPOSTA\n\n");
 	for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
 			fscanf(file,"%d",&matriz_resposta[i][j]);
@@ -486,7 +489,7 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 		final();
 		imprime_tabuleiro(tabuleirox,predefinida); //imprimindo o jogo
 		printf("1)ADICIONAR JOGADA\n2)REMOVER JOGADA\n3)DICA\n");
-		printf("4)RESPOSTA DO SUDOKU\n5)SALVAR \n0)SAIR\n");
+		printf("4)DESISTIR E OBTER A RESPOSTA DO SUDOKU\n5)SALVAR\n6)RETORNAR AO MENU PRINCIPAL\n0)SAIR\n");
 		printf("INSIRA O NUMERO CORRESPONDENTE A SUA ACAO:\n");
 		scanf("%d",&alternativa);
 		switch (alternativa) {  
@@ -537,10 +540,10 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 				system("clear");
 				resposta_tabuleiro(jogo_escolhido, matriz_resposta);
 				imprime_tabuleiro(matriz_resposta,predefinida);	
-				printf("\nAPERTE ENTER PARA RETORNAR AO MENU DO JOGO...\n");
+				printf("\nAPERTE ENTER PARA RETORNAR AO MENU PRINCIPAL...\n");
 				while(getchar()!='\n');
         		getchar();	
-				break;
+				return;
 			case 5:
 				system("clear");
 				while (alternativa != 0 && alternativa != 1){
@@ -561,6 +564,30 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 					}
 				}
 				break;
+			case 6:
+			system("clear");
+				alternativa = -1;
+				while(alternativa != 0 && alternativa!=1){
+					printf("DESEJA SALVAR SEU PROGRESSO?\n");
+					sleep(0.1);
+					printf("APENAS 1 SAVE PODE EXISTIR,");
+					printf(" CASO JA EXISTA OUTRO JOGO, SERA SOBREESCRITO)\n 1-SIM, SALVAR.\t\t\t0-NAO.\n\n");
+					scanf("%d",&alternativa);
+					switch (alternativa)
+					{
+						case 0:
+							return;
+						case 1:
+							t_fim = time(NULL);
+							tempo= difftime(t_fim,t_iniciar);
+							salvar(tabuleirox,jogo_escolhido,tempo,predefinida);
+							return;
+						default:
+							system("clear");
+							printf("OPCAO INVALIDA\n");
+							sleep(0.4);
+					}
+				}
 			default:
 				system("clear");
 				printf("OPCAO INVALIDA\n");
@@ -609,3 +636,5 @@ int main(){
 	return 0;
 }
 
+
+//setbuf(stdin,NULL); LIMPEZA DE BUFFER
