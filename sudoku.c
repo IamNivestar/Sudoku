@@ -5,7 +5,7 @@
 
 //Amaury Mario Ribeiro Neto
 
-int i,j, numero ,linha, coluna;
+int i,j, numero ,linha, coluna, vidas = 3;
 
 float tempo,tempo2=0; //tempo 2 é o tempo carregado de um save
 time_t t_iniciar,t_fim;  //tempo de jogo
@@ -22,6 +22,9 @@ void imprime_regras(){
 	printf("---------------------------TEMPO DO JOGO----------------------------\n");
 	printf("\nO tempo de jogo pode variar, os tres melhores tempos serao registrados");
 	printf("para jogador e dificuldade.\n\n");
+	printf("---------------------------VIDAS----------------------------\n");
+	printf("\nO jogador inicia com 3 vidas, a cada inserção incorreta uma vida será perdida.\n");
+	printf(" Caso o jogador perca zere vidas o jogo é finalizado;");
 	printf("---------------------------LEGENDA----------------------------\n");
 	printf("\nOs valores em verde ja sao preenchidos inicialmente e nao podem ser modificados.\n");
 	printf(" Enquanto os valores inserido pelo usuario estaram com numeracao em branco.\n");
@@ -68,26 +71,33 @@ void imprime_records(){
 }
 
 //funçoes de verificacao sudoku----------------------------------------------------------
-int tentativa_de_colocar_numero (int a, int b, int c){ //examina se o jogador acertou na inserção
-	for (j = 0; j < 9; j++) {     //conferindo se possui o mesmo valor naquela coluna
-		if (tabuleirox[j][b] == c)
+int tentativa_de_colocar_numero (int li, int col, int numero){ //examina se o jogador acertou na inserção
+	
+	if(tabuleirox[li][col] == numero){ //valor ja foi adicionado (bug caso repetisse)
+		return 1;
+	}
+	for (j = 0; j < 9; j++) {     //conferindo se possui o mesmo valor naquela linha
+		//debug
+		//printf("verificando linhas... se %d na linha %d, coluna %d é igual a %d! ", numero, j+1, col+1, tabuleirox[j][col]); 
+		if (tabuleirox[j][col] == numero)
 			return 0;
 	}
-	for (j = 0; j < 9; j++) {    //conferindo se possui o mesmo valor naquela linha
-		if (tabuleirox[a][j] == c) 
+	for (j = 0; j < 9; j++) {    //conferindo se possui o mesmo valor naquela coluna
+		//debug
+		//printf("verificando colunas... se %d na linha %d, coluna %d é igual a %d! ", numero, li+1, j+1, tabuleirox[li][j]);
+		if (tabuleirox[li][j] == numero) 
 			return 0;
 	}  //conferindo se possui o mesmo valor naquela divisoria
-	for (i = 0; i < 9; i++) {
-		if (tabuleirox[a][i] == c) 
-			return 0;
-		for (j = a - a % 3; j < a - a % 3 +3; j++){
-			for (i= b - b % 3; i < b - b % 3 + 3; i++){
-				if (tabuleirox[j][i] == c) 
-					return 0;
-			}
+
+	for (j = li - (li % 3); j < (li - (li % 3)) +3; j++){
+		for (i= col - (col % 3); i < (col - (col % 3)) + 3; i++){
+			//debug
+			//printf("verificando submatriz... se %d na linha %d, coluna %d é igual a %d! ", numero, j+1, i+1, tabuleirox[j][i]);
+			if (tabuleirox[j][i] == numero) 
+				return 0;
 		}
-		return 1; //valor passou nos testes e foi inserito corretamente
 	}
+	return 1; //valor passou nos testes e foi inserito corretamente
 }
 
 int checar_coordenada (int linha, int coluna){ //verificando se as coordenas são validas
@@ -292,17 +302,24 @@ void melhores_tempos(float tempo,char jogador[]){
 	}
 }
 
-void final(){ //função para verificar se o tabuleiro foi concluido e para finalizar o jogo
-	char jogador[25];
+int final(){ //função para verificar se o tabuleiro foi concluido e para finalizar o jogo
+	
+	if(!vidas){
+		printf("VOCE NAO TEM MAIS VIDAS");
+		printf("\nAPERTE ENTER PARA RETORNAR AO MENU DO JOGO...\n");	
+		while(getchar()!='\n');
+			getchar();
+		return 1;
+	}
   	for (i = 0; i < 9; i++) {
     	for (j = 0; j < 9; j++) {
       		if (tabuleirox[i][j] == 0) { //celula nao preenchida jogo ainda n terminou
-        		return; 
+        		return 0; 
       		}
     	}
   	}
-	printf("PARABÉNS TABULEIRO PREENCHIDO\n");
-	t_fim;
+	printf("PARABENS TABULEIRO PREENCHIDO\n");
+	char jogador[25];
 	t_fim = time(NULL);
 	tempo= difftime(t_fim,t_iniciar);
 	tempo= tempo + tempo2;
@@ -312,49 +329,42 @@ void final(){ //função para verificar se o tabuleiro foi concluido e para fina
 	printf("VOCE CONCLUIU O JOGO EM %.2f MINUTOS\n",tempo);
 	printf("OBRIGADO POR JOGAR %s!!!\n\n",jogador);
 	melhores_tempos(tempo,jogador);
-	exit(0);
+	printf("\nAPERTE ENTER PARA RETORNAR AO MENU DO JOGO...\n");	
+	while(getchar()!='\n');
+		getchar();
+	return 1;
 }
 
 //funções para o menu do jogo ------------------------------------------------------------------------
 void dica(){
-	int l,c,k,cont=0;
+	
+	int l,c, resposta, possiveis_valores=0;
+	for(l=0; l<9; l++){ //percorrendo linhas
+		for(c=0; c<9; c++){ // percorrendo colunas
+			if ( checar_coordenada(l, c) ) { //verificando se é uma celula vazio
 
-	/*	int p; //variavel qualquer para receber o valor;
-	for(k=1;k<=9;k++){//testando valores
-		cont=0;
-		for (j = 0; j <= 9; j++) {     //conferindo se possui o mesmo valor naquela coluna
-			if (tabuleirox[j][c] == k) {
-				cont++;
-			}
-		}
-		for (j = 0; j < 9; j++) {    //conferindo se possui o mesmo valor naquela linha
-			if (tabuleirox[l][j] == k) {
-				cont ++;
-			}
-		}
-		for (j = l - l % 3; j < l - l % 3 +3; j++){
-			for (i= c - c % 3; i < c - c % 3 + 3; i++){
-				if (tabuleirox[j][i] == k){
-					cont++;
+				numero = 1; //reiniciando numeros
+
+				for (i = 1; i<10; i++){  //testando todos os possiveis números para aquela celula vazia
+					numero = i;
+					if ( tentativa_de_colocar_numero(l, c, numero) ){
+						printf("valor enconrado: LINHA %d E A COLUNA %d COM O VALOR %d.\n", l+1, c+1, numero);
+						possiveis_valores++;
+						resposta = numero;
+					}
+					if(possiveis_valores>1)
+						break;			
+				}
+				if(possiveis_valores == 1){
+					//system("clear");
+					printf("E POSSIVEL PREENCHER A LINHA %d E A COLUNA %d COM O VALOR %d.\n", l+1, c+1, resposta);
+					return;
 				}
 			}
 		}
-		if(cont==0){
-				printf("Possivel valor: %d\n",k);
-				printf("Digite um valor para voltar ao menu do jogo matriz\n");
-				scanf("%d",&p);
-				return;
-			}
 	}
-	system("clear");
-	printf("Não há uma solução possível para estas coordenadas\n");
-	return;
-	*/
-
-		system("clear");
-		printf("NAO FOI POSSIVEL ENCONTRAR UM DICA\n");
-		return;
-
+	//system("clear");
+	printf("NAO FOI POSSIVEL ENCONTRAR UM DICA\n");
 }
 
 void resposta_tabuleiro(int jogo_escolhido, int matriz_resposta[][9]){
@@ -422,21 +432,23 @@ void remover_jogada(){
 }
 
 void adicionar_jogada(){
+
 	printf("INSIRA A LINHA QUE DESEJA INSERIR O NUMERO\n");
 	scanf("%d",&linha);
     printf("INSIRA A COLUNA QUE DESEJA INSERIR O NUMERO\n");
     scanf("%d",&coluna);
     printf("INSIRA O NUMERO ENTRE 1 A 9 QUE DESEJA INSERIR:\n");
     scanf("%d",&numero);
-    if (checar_coordenada(linha-1, coluna-1) == 1) {  //chamando função verificar numero
-      	if (checar_valor(linha-1, coluna-1, numero) == 1) {
-          	if (tentativa_de_colocar_numero(linha-1, coluna-1, numero) == 1) {
+    if ( checar_coordenada(linha-1, coluna-1) ) {  //chamando função verificar numero
+      	if ( checar_valor(linha-1, coluna-1, numero) ) {
+          	if ( tentativa_de_colocar_numero(linha-1, coluna-1, numero) ) {
 				tabuleirox[linha-1][coluna-1] = numero;
 				system("clear");
 				printf("VALOR ADICIONADO COM SUCESSO\n\n");
           	}else{
 				imprime_tabuleiro(tabuleirox,predefinida);
-				printf("VALOR INSERIDO ESTA INCORRETO PARA ESTA COORDENADA\n\n");
+				printf("VALOR INSERIDO NAO PODE SER ADICIONADO NESTA COORDENADA. UMA VIDA FOI PERDIDA.\n\n");
+				vidas--;
           	}
 
         }else{
@@ -484,8 +496,8 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 	t_iniciar = time(NULL); //iniciar
 	int matriz_resposta[9][9];
 
-	while(alternativa !=0){
-		final();
+	while(alternativa!=0 && !final() ){
+		printf("\t\tTABULEIRO %d - VIDAS = %d\n\n", jogo_escolhido, vidas);
 		imprime_tabuleiro(tabuleirox,predefinida); //imprimindo o jogo
 		printf("1)ADICIONAR JOGADA\n2)REMOVER JOGADA\n3)DICA\n");
 		printf("4)DESISTIR E OBTER A RESPOSTA DO SUDOKU\n5)SALVAR\n6)RETORNAR AO MENU PRINCIPAL\n0)SAIR\n");
@@ -518,13 +530,13 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 				}
 			case 1:
 				system("clear");
-				printf("\t\tINSERCAO\n\n");
+				printf("----------INSERCAO--------");
 				imprime_tabuleiro(tabuleirox, predefinida);
 				adicionar_jogada();
 				break;
 			case 2:
 				system("clear");
-				printf("\t\tREMOCAO\n\n");
+				printf("-----------REMOCAO-----------");
 				imprime_tabuleiro(tabuleirox, predefinida);
 				remover_jogada();
 				break;
@@ -610,6 +622,7 @@ int main(){
 				exit(0);
 			case 1:
 				jogo_escolhido = escolha_tabuleiro(tabuleirox,predefinida);
+				vidas = 3;
 				menu_jogo(jogo_escolhido);
 				break;
 			case 2:
