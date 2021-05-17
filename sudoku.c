@@ -71,23 +71,31 @@ void imprime_records(){
 }
 
 //funçoes de verificacao sudoku----------------------------------------------------------
-int tentativa_de_colocar_numero (int li, int col, int numero){ //examina se o jogador acertou na inserção
-	
-	if(tabuleirox[li][col] == numero){ //valor ja foi adicionado (bug caso repetisse)
-		return 1;
-	}
+
+int verifica_linha(int col, int numero){
+
 	for (j = 0; j < 9; j++) {     //conferindo se possui o mesmo valor naquela linha
 		//debug
 		//printf("verificando linhas... se %d na linha %d, coluna %d é igual a %d! ", numero, j+1, col+1, tabuleirox[j][col]); 
 		if (tabuleirox[j][col] == numero)
 			return 0;
 	}
+	return 1;
+}
+
+int verifica_coluna(int li, int numero){
+
 	for (j = 0; j < 9; j++) {    //conferindo se possui o mesmo valor naquela coluna
 		//debug
 		//printf("verificando colunas... se %d na linha %d, coluna %d é igual a %d! ", numero, li+1, j+1, tabuleirox[li][j]);
 		if (tabuleirox[li][j] == numero) 
 			return 0;
 	}  //conferindo se possui o mesmo valor naquela divisoria
+
+	return 1;
+}
+
+int verifica_submatriz(int li, int col, int numero){
 
 	for (j = li - (li % 3); j < (li - (li % 3)) +3; j++){
 		for (i= col - (col % 3); i < (col - (col % 3)) + 3; i++){
@@ -97,6 +105,23 @@ int tentativa_de_colocar_numero (int li, int col, int numero){ //examina se o jo
 				return 0;
 		}
 	}
+	return 1;
+}
+
+int tentativa_de_colocar_numero (int li, int col, int numero){ //examina se o jogador acertou na inserção
+	
+	if(tabuleirox[li][col] == numero) //valor ja foi adicionado (bug caso repetisse)
+		return 1;
+	
+	if (!verifica_linha(col,numero))
+		return 0;
+
+	if ( !verifica_coluna(li, numero) )
+		return 0;
+	
+	if( !verifica_submatriz(li, col, numero))
+		return 0;
+
 	return 1; //valor passou nos testes e foi inserito corretamente
 }
 
@@ -224,16 +249,23 @@ void salvar(int tabuleirox[][9],int jogo_escolhido,float tempo,int predefinida[]
 		for(j=0;j<9;j++){
 			fprintf(salvo,"%d ",tabuleirox[i][j]);  //salvando o jogo
 		}
+		fprintf(salvo,"\n");  //salvando o jogo
 	}
 	fprintf(salvo,"\n");
 	for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
 			fprintf(salvo,"%d ",predefinida[i][j]);  //salvando o jogo
 		}
-	fprintf(salvo,"\n");
+		fprintf(salvo,"\n");
 	}
+	fprintf(salvo,"\n");
 	fprintf(salvo,"%d\n", jogo_escolhido); //salvando o numero do tabuleiro
-	fprintf(salvo,"%f", tempo); //salvando tempo
+	t_fim = time(NULL);
+	tempo= difftime(t_fim,t_iniciar);
+	tempo= tempo/60;
+	tempo= tempo + tempo2;
+	fprintf(salvo,"%f\n", tempo); //salvando tempo
+	fprintf(salvo,"%d",vidas);  //salvando o jogo
 	fclose(salvo);
 	printf("JOGO SALVO COM SUCESSO\n");
 }
@@ -335,27 +367,47 @@ int final(){ //função para verificar se o tabuleiro foi concluido e para final
 	return 1;
 }
 
+int unica_submatriz(int li, int col, int numero){//é o unico valor possivel naquela submatriz
+	//verifica se o valor também é possivel em mais alguma celula daquela submatriz
+	for (j = li - (li % 3); j < (li - (li % 3)) +3; j++){
+		for (i= col - (col % 3); i < (col - (col % 3)) + 3; i++){
+			if( verifica_linha(col,numero) )
+				return 0;
+			if( verifica_coluna(li,numero) )
+				return 0;			
+		}
+	}
+	return 1;
+}
+
 //funções para o menu do jogo ------------------------------------------------------------------------
 void dica(){
 	
-	int l,c, resposta, possiveis_valores=0;
+	int l,c, resposta, possiveis_valores;
 	for(l=0; l<9; l++){ //percorrendo linhas
 		for(c=0; c<9; c++){ // percorrendo colunas
+			possiveis_valores = 0;
 			if ( checar_coordenada(l, c) ) { //verificando se é uma celula vazio
-
+			
 				numero = 1; //reiniciando numeros
 
 				for (i = 1; i<10; i++){  //testando todos os possiveis números para aquela celula vazia
-					numero = i;
-					if ( tentativa_de_colocar_numero(l, c, numero) ){
-						printf("valor enconrado: LINHA %d E A COLUNA %d COM O VALOR %d.\n", l+1, c+1, numero);
-						possiveis_valores++;
-						resposta = numero;
-					}
-					if(possiveis_valores>1)
-						break;			
+					
+					if(tabuleirox[l][c] == 0){
+						numero = i;
+						if ( tentativa_de_colocar_numero(l, c, numero) ){
+							//printf("valor enconrado: LINHA %d E A COLUNA %d COM O VALOR %d.\n", l+1, c+1, numero);
+							possiveis_valores++;
+							resposta = numero;
+							/*if( unica_submatriz(l,c,numero) ){
+								printf("E POSSIVEL PREENCHER A LINHA %d E A COLUNA %d COM O VALOR %d.\n", l+1, c+1, resposta);
+								return;
+							}*/
+						}	
+					}		
 				}
-				if(possiveis_valores == 1){
+
+				if(possiveis_valores == 1){ // encontra se so existe um valor possivel naquela celula
 					//system("clear");
 					printf("E POSSIVEL PREENCHER A LINHA %d E A COLUNA %d COM O VALOR %d.\n", l+1, c+1, resposta);
 					return;
@@ -454,14 +506,14 @@ void adicionar_jogada(){
         }else{
 			imprime_tabuleiro(tabuleirox,predefinida);
 			printf("NUMERO DIGITADO E INVALIDO.\n\n");
-			return adicionar_jogada();
+			return;
       	}
 
     }else{
 		system("clear");
 		imprime_tabuleiro(tabuleirox,predefinida);
 		printf("COORDENADA DIGITADA E INVALIDA\n\n");
-		return adicionar_jogada();
+		return;
     }
 }
 
@@ -487,6 +539,7 @@ int carregar_jogo(){
 	}
 	fscanf(save,"%d",&jogo_escolhido);
 	fscanf(save,"%f",&tempo2);
+	fscanf(save,"%d",&vidas);
 	fclose(save);
 	return jogo_escolhido;
 }
@@ -518,8 +571,6 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 						case 0:
 							exit(0);
 						case 1:
-							t_fim = time(NULL);
-							tempo= difftime(t_fim,t_iniciar);
 							salvar(tabuleirox,jogo_escolhido,tempo,predefinida);
 							exit(0);
 						default:
@@ -530,13 +581,13 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 				}
 			case 1:
 				system("clear");
-				printf("----------INSERCAO--------");
+				printf("----------INSERCAO---------\n");
 				imprime_tabuleiro(tabuleirox, predefinida);
 				adicionar_jogada();
 				break;
 			case 2:
 				system("clear");
-				printf("-----------REMOCAO-----------");
+				printf("-----------REMOCAO-----------\n");
 				imprime_tabuleiro(tabuleirox, predefinida);
 				remover_jogada();
 				break;
@@ -564,8 +615,6 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 						case 0:
 							break;
 						case 1:
-							t_fim = time(NULL);
-							tempo= difftime(t_fim,t_iniciar);
 							salvar(tabuleirox,jogo_escolhido,tempo,predefinida);
 							break;
 						default:
@@ -589,8 +638,6 @@ void menu_jogo(int jogo_escolhido){//onde são printadas e decididas as escolhas
 						case 0:
 							return;
 						case 1:
-							t_fim = time(NULL);
-							tempo= difftime(t_fim,t_iniciar);
 							salvar(tabuleirox,jogo_escolhido,tempo,predefinida);
 							return;
 						default:
